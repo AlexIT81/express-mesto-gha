@@ -1,23 +1,30 @@
 const User = require('../models/user');
 
+const {
+  CREATED_OK_CODE,
+  BAD_REQUEST_ERROR_CODE,
+  NOT_FOUND_ERROR_CODE,
+  SERVER_ERROR_CODE,
+} = require('../utils/constants');
+
 module.exports.getAllUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => res.status(SERVER_ERROR_CODE).send({ message: err.message }));
 };
 
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.status(CREATED_OK_CODE).send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({
+        res.status(BAD_REQUEST_ERROR_CODE).send({
           message: 'Переданы некорректные данные при создании пользователя.',
         });
         return;
       }
-      res.status(500).send({ message: err.message });
+      res.status(SERVER_ERROR_CODE).send({ message: err.message });
     });
 };
 
@@ -27,12 +34,12 @@ module.exports.getUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({
+        res.status(BAD_REQUEST_ERROR_CODE).send({
           message: `Пользователь по указанному id:${userId} не найден.`,
         });
         return;
       }
-      res.status(500).send({ message: err.message });
+      res.status(SERVER_ERROR_CODE).send({ message: err.message });
     });
 };
 
@@ -42,24 +49,24 @@ module.exports.updateProfile = (req, res) => {
   User.findOneAndUpdate(
     { _id: owner },
     { $set: { name, about, avatar } },
-    { returnOriginal: false },
+    { new: true },
     { runValidators: true },
   )
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({
+        res.status(BAD_REQUEST_ERROR_CODE).send({
           message: 'Переданы некорректные данные при обновлении профиля.',
         });
         return;
       }
       if (err.name === 'CastError') {
         res
-          .status(404)
+          .status(NOT_FOUND_ERROR_CODE)
           .send({ message: `Пользователь с указанным id:${owner} не найден.` });
         return;
       }
-      res.status(500).send({ message: err.message });
+      res.status(SERVER_ERROR_CODE).send({ message: err.message });
     });
 };
 
@@ -76,17 +83,17 @@ module.exports.updateAvatar = (req, res) => {
     .catch((err) => {
       res.send(avatar);
       if (!avatar) {
-        res.status(400).send({
+        res.status(BAD_REQUEST_ERROR_CODE).send({
           message: 'Переданы некорректные данные при обновлении аватара.',
         });
         return;
       }
       if (err.name === 'CastError') {
         res
-          .status(404)
+          .status(NOT_FOUND_ERROR_CODE)
           .send({ message: `Пользователь с указанным id:${owner} не найден.` });
         return;
       }
-      res.status(500).send({ message: err.message });
+      res.status(SERVER_ERROR_CODE).send({ message: err.message });
     });
 };
