@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
 const { PORT = 3000 } = process.env;
-const DB_URL = 'mongodb://127.0.0.1:27017/mestodb';
+const DB_URL = 'mongodb://localhost:27017/mestodb';
 const app = express();
 const helmet = require('helmet');
 
