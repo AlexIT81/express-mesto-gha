@@ -1,7 +1,6 @@
 const Card = require('../models/card');
 
 const {
-  RESPONSE_OK_CODE,
   CREATED_OK_CODE,
   BAD_REQUEST_ERROR_CODE,
   NOT_FOUND_ERROR_CODE,
@@ -11,7 +10,7 @@ const {
 module.exports.getAllCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch((err) => res.status(SERVER_ERROR_CODE).send({ message: err.message }));
+    .catch(() => res.status(SERVER_ERROR_CODE).send({ message: 'Произошла внутренняя ошибка сервера' }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -24,7 +23,7 @@ module.exports.createCard = (req, res) => {
         res.status(BAD_REQUEST_ERROR_CODE).send({
           message: 'Переданы некорректные данные при создании карточки.',
         });
-      } else { res.status(SERVER_ERROR_CODE).send({ message: err.message }); }
+      } else { res.status(SERVER_ERROR_CODE).send({ message: 'Произошла внутренняя ошибка сервера' }); }
     });
 };
 
@@ -34,14 +33,14 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => {
       if (card === null) {
         res.status(NOT_FOUND_ERROR_CODE).send({ message: `Карточка с указанным _id: ${cardId} не найдена.` });
-      } else { res.status(RESPONSE_OK_CODE).send({ message: card }); }
+      } else { res.send({ message: card }); }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(BAD_REQUEST_ERROR_CODE).send({
           message: `Карточка с указанным _id: ${cardId} не найдена.`,
         });
-      } else { res.status(SERVER_ERROR_CODE).send({ message: err.message }); }
+      } else { res.status(SERVER_ERROR_CODE).send({ message: 'Произошла внутренняя ошибка сервера' }); }
     });
 };
 
@@ -61,7 +60,7 @@ module.exports.likeCard = (req, res) => {
         res.status(BAD_REQUEST_ERROR_CODE).send({
           message: 'Переданы некорректные данные для постановки лайка.',
         });
-      } else { res.status(SERVER_ERROR_CODE).send({ message: err.message }); }
+      } else { res.status(SERVER_ERROR_CODE).send({ message: 'Произошла внутренняя ошибка сервера' }); }
     });
 };
 
@@ -81,6 +80,6 @@ module.exports.dislikeCard = (req, res) => {
         res.status(BAD_REQUEST_ERROR_CODE).send({
           message: 'Переданы некорректные данные для постановки лайка.',
         });
-      } else { res.status(SERVER_ERROR_CODE).send({ message: err.message }); }
+      } else { res.status(SERVER_ERROR_CODE).send({ message: 'Произошла внутренняя ошибка сервера' }); }
     });
 };

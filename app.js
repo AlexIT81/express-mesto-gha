@@ -6,11 +6,21 @@ const { PORT = 3000 } = process.env;
 const DB_URL = 'mongodb://localhost:27017/mestodb';
 const app = express();
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const {
   NOT_FOUND_ERROR_CODE,
 } = require('./utils/constants');
 
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 100,
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+app.use(limiter);
 app.use(helmet());
+app.disable('x-powered-by');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
