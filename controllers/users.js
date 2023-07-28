@@ -1,6 +1,7 @@
 const User = require('../models/user');
 
 const {
+  RESPONSE_OK_CODE,
   CREATED_OK_CODE,
   BAD_REQUEST_ERROR_CODE,
   NOT_FOUND_ERROR_CODE,
@@ -29,10 +30,14 @@ module.exports.createUser = (req, res) => {
 module.exports.getUser = (req, res) => {
   const { userId } = req.params;
   User.findOne({ _id: userId })
-    .then((user) => res.send({ data: user }))
+    .then((data) => {
+      if (data === null) {
+        res.status(NOT_FOUND_ERROR_CODE).send({ message: `Пользователь по указанному id:${userId} не найден.` });
+      } else { res.status(RESPONSE_OK_CODE).send({ message: data }); }
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(NOT_FOUND_ERROR_CODE).send({
+        res.status(BAD_REQUEST_ERROR_CODE).send({
           message: `Пользователь по указанному id:${userId} не найден.`,
         });
       } else { res.status(SERVER_ERROR_CODE).send({ message: err.message }); }
@@ -69,7 +74,7 @@ module.exports.updateAvatar = (req, res) => {
     { $set: { avatar } },
     { new: true, runValidators: true },
   )
-    .then((data) => res.send({ data: data.avatar }))
+    .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR_CODE).send({
