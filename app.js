@@ -6,6 +6,9 @@ const { PORT = 3000 } = process.env;
 const DB_URL = 'mongodb://localhost:27017/mestodb';
 const app = express();
 const helmet = require('helmet');
+const {
+  NOT_FOUND_ERROR_CODE,
+} = require('./utils/constants');
 
 app.use(helmet());
 app.use(bodyParser.json());
@@ -21,11 +24,16 @@ app.use((req, res, next) => {
   req.user = {
     _id: '64c15992edab62ed20ff49a7', // вставьте сюда _id созданного в предыдущем пункте пользователя
   };
-
   next();
 });
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
+
+app.all('*', (req, res) => {
+  res.status(NOT_FOUND_ERROR_CODE).send({
+    message: 'Такого не существует(',
+  });
+});
 
 app.listen(PORT);

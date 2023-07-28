@@ -22,9 +22,7 @@ module.exports.createUser = (req, res) => {
         res.status(BAD_REQUEST_ERROR_CODE).send({
           message: 'Переданы некорректные данные при создании пользователя.',
         });
-        return;
-      }
-      res.status(SERVER_ERROR_CODE).send({ message: err.message });
+      } else { res.status(SERVER_ERROR_CODE).send({ message: err.message }); }
     });
 };
 
@@ -34,12 +32,10 @@ module.exports.getUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST_ERROR_CODE).send({
+        res.status(NOT_FOUND_ERROR_CODE).send({
           message: `Пользователь по указанному id:${userId} не найден.`,
         });
-        return;
-      }
-      res.status(SERVER_ERROR_CODE).send({ message: err.message });
+      } else { res.status(SERVER_ERROR_CODE).send({ message: err.message }); }
     });
 };
 
@@ -49,8 +45,7 @@ module.exports.updateProfile = (req, res) => {
   User.findOneAndUpdate(
     { _id: owner },
     { $set: { name, about, avatar } },
-    { new: true },
-    { runValidators: true },
+    { new: true, runValidators: true },
   )
     .then((user) => res.send({ data: user }))
     .catch((err) => {
@@ -58,15 +53,11 @@ module.exports.updateProfile = (req, res) => {
         res.status(BAD_REQUEST_ERROR_CODE).send({
           message: 'Переданы некорректные данные при обновлении профиля.',
         });
-        return;
-      }
-      if (err.name === 'CastError') {
+      } else if (err.name === 'CastError') {
         res
           .status(NOT_FOUND_ERROR_CODE)
           .send({ message: `Пользователь с указанным id:${owner} не найден.` });
-        return;
-      }
-      res.status(SERVER_ERROR_CODE).send({ message: err.message });
+      } else { res.status(SERVER_ERROR_CODE).send({ message: err.message }); }
     });
 };
 
@@ -76,24 +67,18 @@ module.exports.updateAvatar = (req, res) => {
   User.findOneAndUpdate(
     { _id: owner },
     { $set: { avatar } },
-    { returnOriginal: false },
-    { runValidators: true },
+    { new: true, runValidators: true },
   )
-    .then((data) => res.send({ data }))
+    .then((data) => res.send({ data: data.avatar }))
     .catch((err) => {
-      res.send(avatar);
-      if (!avatar) {
+      if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR_CODE).send({
           message: 'Переданы некорректные данные при обновлении аватара.',
         });
-        return;
-      }
-      if (err.name === 'CastError') {
+      } else if (err.name === 'CastError') {
         res
           .status(NOT_FOUND_ERROR_CODE)
           .send({ message: `Пользователь с указанным id:${owner} не найден.` });
-        return;
-      }
-      res.status(SERVER_ERROR_CODE).send({ message: err.message });
+      } else { res.status(SERVER_ERROR_CODE).send({ message: err }); }
     });
 };
