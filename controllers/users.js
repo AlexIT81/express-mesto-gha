@@ -8,6 +8,8 @@ const {
   NOT_FOUND_ERROR_CODE,
   SERVER_ERROR_CODE,
   UNAUTHORIZED_ERROR_CODE,
+  CONFLICT_ERROR_CODE,
+  SECRET_KEY,
 } = require('../utils/constants');
 
 module.exports.getAllUsers = (req, res) => {
@@ -31,14 +33,20 @@ module.exports.createUser = (req, res) => {
     email,
     password: hash,
   }))
-
-    .then((user) => res.status(CREATED_OK_CODE).send({ data: user }))
+    .then((user) => {
+      const newUser = user.toObject();
+      delete newUser.password;
+      console.log(newUser);
+      res.status(CREATED_OK_CODE).send({ data: newUser });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR_CODE).send({
           message: 'Переданы некорректные данные при создании пользователя.',
         });
-      } else { res.status(SERVER_ERROR_CODE).send({ message: 'Произошла внутренняя ошибка сервера' }); }
+      } else if (err.code === 11000) {
+        res.status(CONFLICT_ERROR_CODE).send({ message: 'Ошибка базы данных!' });
+      } else { res.status(SERVER_ERROR_CODE).send({ message: err }); }
     });
 };
 
@@ -109,10 +117,17 @@ module.exports.login = (req, res) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        'some-secret-key',
+        SECRET_KEY,
         { expiresIn: '7d' },
       );
       res.send({ token });
     })
     .catch(() => { res.status(UNAUTHORIZED_ERROR_CODE).send({ message: 'Ошибка авторизации!' }); });
+};
+
+module.exports.getUserInfo = (req, res) => {
+  const userId = req.user._id;
+  User.findById(userId)
+    .then((user) => res.send({ data: user }))
+    .catch((err) => console.log(err)); // доработать контроль ошибок
 };

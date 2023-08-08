@@ -5,6 +5,7 @@ const {
   BAD_REQUEST_ERROR_CODE,
   NOT_FOUND_ERROR_CODE,
   SERVER_ERROR_CODE,
+  FORBIDDEN_ERROR_CODE,
 } = require('../utils/constants');
 
 module.exports.getAllCards = (req, res) => {
@@ -29,11 +30,17 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   const { cardId } = req.params;
-  Card.findByIdAndDelete(cardId)
+  const userId = req.user._id;
+  Card.findById(cardId)
     .then((card) => {
-      if (card === null) {
-        res.status(NOT_FOUND_ERROR_CODE).send({ message: `Карточка с указанным _id: ${cardId} не найдена.` });
-      } else { res.send({ message: card }); }
+      if (card.owner.toString() === userId) {
+        Card.findByIdAndDelete(cardId)
+          .then((deletedCard) => {
+            if (deletedCard === null) {
+              res.status(NOT_FOUND_ERROR_CODE).send({ message: `Карточка с указанным _id: ${cardId} не найдена.` });
+            } else { res.send({ message: deletedCard }); }
+          });
+      } else { res.status(FORBIDDEN_ERROR_CODE).send({ message: 'Доступ запрещен!' }); }
     })
     .catch((err) => {
       if (err.name === 'CastError') {

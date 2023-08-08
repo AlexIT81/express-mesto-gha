@@ -11,6 +11,12 @@ const {
   NOT_FOUND_ERROR_CODE,
 } = require('./utils/constants');
 
+const {
+  login,
+  createUser,
+} = require('./controllers/users');
+const auth = require('./middlewares/auth');
+
 const limiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 100,
@@ -30,13 +36,10 @@ mongoose.connect(DB_URL, {
   .then(() => console.log(`Подключена база данных по адресу ${DB_URL}`))
   .catch((err) => console.log(err));
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '64c15992edab62ed20ff49a7', // вставьте сюда _id созданного в предыдущем пункте пользователя
-  };
-  next();
-});
+app.post('/signin', login);
+app.post('/signup', createUser);
 
+app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
