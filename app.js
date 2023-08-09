@@ -16,6 +16,7 @@ const {
   createUser,
 } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const handleError = require('./middlewares/handleError');
 
 const limiter = rateLimit({
   windowMs: 10 * 60 * 1000,
@@ -48,5 +49,7 @@ app.all('*', (req, res) => {
     message: 'Такого не существует(',
   });
 });
+
+app.use(handleError);
 
 app.listen(PORT);
