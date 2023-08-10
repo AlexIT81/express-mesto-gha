@@ -41,8 +41,11 @@ module.exports.deleteCard = (req, res, next) => {
       } else { throw new ForbiddenError('Доступ запрещен!'); }
     })
     .catch((err) => {
+      console.log(err);
       if (err.name === 'CastError') {
         next(new BadRequestError(`Карточка с указанным _id: ${cardId} не найдена.`));
+      } else if (err.name === 'TypeError') {
+        next(new NotFoundError(`Карточка с указанным _id: ${cardId} не найдена.`));
       } else { next(err); }
     });
 };
