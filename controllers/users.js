@@ -109,7 +109,8 @@ module.exports.login = (req, res, next) => {
         SECRET_KEY,
         { expiresIn: '7d' },
       );
-      res.send({ token });
+      // res.send({ token });
+      res.cookie('authorization', token, { maxAge: 3600000 * 24 * 7, httpOnly: true }).send({ message: 'Авторизация успешна!' });
     })
     .catch(next);
 };

@@ -6,15 +6,14 @@ const {
 } = require('../utils/constants');
 
 module.exports = (req, res, next) => {
-  const { authorization } = req.headers;
-
-  if (!authorization || !authorization.startsWith('Bearer ')) {
+  const { authorization } = req.cookies;
+  if (!authorization) {
     return res
       .status(UNAUTHORIZED_ERROR_CODE)
       .send({ message: 'Необходима авторизация!' });
   }
 
-  const token = authorization.replace('Bearer ', '');
+  const token = authorization;
   let payload;
 
   try {
