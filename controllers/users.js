@@ -75,9 +75,9 @@ module.exports.updateProfile = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при обновлении профиля.'));
+        next(new BadRequestError({ message: 'Переданы некорректные данные при обновлении профиля.' }));
       } else if (err.name === 'CastError') {
-        next(new NotFoundError(`Пользователь по указанному id:${owner} не найден.`));
+        next(new NotFoundError({ message: `Пользователь по указанному id:${owner} не найден.` }));
       } else { next(err); }
     });
 };
@@ -93,9 +93,9 @@ module.exports.updateAvatar = (req, res, next) => {
     .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
+        next(new BadRequestError({ message: 'Переданы некорректные данные при обновлении аватара.' }));
       } else if (err.name === 'CastError') {
-        next(new NotFoundError(`Пользователь с указанным id:${owner} не найден.`));
+        next(new NotFoundError({ message: `Пользователь с указанным id:${owner} не найден.` }));
       } else { next(err); }
     });
 };
