@@ -32,12 +32,13 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findById(cardId)
     .then((card) => {
       if (card.owner.toString() === userId) {
-        Card.findByIdAndDelete(cardId)
-          .then((deletedCard) => {
-            if (deletedCard === null) {
+        Card.deleteOne({ _id: cardId })
+          .then((deleteCard) => {
+            if (deleteCard === null) {
               throw new NotFoundError(`Карточка с указанным _id: ${cardId} не найдена.`);
-            } else { res.send({ message: deletedCard }); }
-          });
+            } else { res.send({ message: 'Карточка удалена!' }); }
+          })
+          .catch(next);
       } else { throw new ForbiddenError('Доступ запрещен!'); }
     })
     .catch((err) => {
